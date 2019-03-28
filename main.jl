@@ -5,8 +5,7 @@ import DelimitedFiles.writedlm
 import Printf.@printf
 
 
-function getBilevel(fnum)
-    D_ul = D_ll = 5
+function getBilevel(fnum; D_ul = 5, D_ll = 5)
 
     bounds_ul, bounds_ll = bilevel_ranges(D_ul, D_ll, fnum)
 
@@ -27,6 +26,35 @@ function test()
     for fnum = 1:8
         F, f, bounds_ul, bounds_ll = getBilevel(fnum)
         method = QBCA(size(bounds_ul, 2); options = Bilevel.Options(F_tol=1e-4, f_tol=1e-4))
+        result = optimize(F, f, bounds_ul, bounds_ll, method, Bilevel.Information(F_optimum=0.0, f_optimum=0.0))
+        b   = result.best_sol
+        iters  = result.iteration
+        nevals_ul = result.F_calls
+        nevals_ll = result.f_calls
+        
+        @printf("SMD%d \t F = %e \t f = %e \t ev_ul = %d \t ev_ll = %d\n", fnum, b.F, b.f, nevals_ul, nevals_ll)
+    end
+
+end
+
+function test2()
+
+    for fnum = 9:12
+        F_, f_, bounds_ul, bounds_ll = getBilevel(fnum)
+        method = QBCA(size(bounds_ul, 2); options = Bilevel.Options(F_tol=1e-4, f_tol=1e-4))
+
+        f(x, y) = begin 
+            ff, g = f_(x, y)
+            g = g[ g .> 0 ]
+            ff + 100*sum(g)
+        end
+
+        F(x, y) = begin 
+            FF, g = F_(x, y)
+            g = g[ g .> 0 ]
+            FF + 100*sum(g)
+        end
+
         result = optimize(F, f, bounds_ul, bounds_ll, method, Bilevel.Information(F_optimum=0.0, f_optimum=0.0))
         b   = result.best_sol
         iters  = result.iteration
@@ -104,4 +132,4 @@ function saveData(output_dir="./")
 end
 
 
-test()
+test2()
