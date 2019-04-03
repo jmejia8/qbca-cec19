@@ -14,9 +14,9 @@ function plotConvergence(data)
     end
 
     l = @layout [a b; c]
-    p1 = plot(ul_evals, Fs, title="UL convergence")
-    p2 = plot(ll_evals, fs, title="LL convergence")
-    p3 = plot(fs .+ 0.05Fs, title="\$\\varphi\$ convergence")
+    p1 = plot(color=:black, title="UL convergence", xlabel="F calls")
+    p2 = plot(color=:black, title="LL convergence", xlabel="f calls")
+    p3 = plot(fs .+ 0.05Fs, color=:black, title="\$\\varphi_f\$ convergence")
     plot(p1, p2, p3, layout=l)
 
 end

@@ -3,9 +3,10 @@ using Bilevel
 using CSVanalyzer
 import DelimitedFiles.writedlm
 import Printf.@printf
+using JLD
 
 include("tools.jl")
-include("plots.jl")
+# include("plots.jl")
 
 function getBilevel(fnum; D_ul = 5, D_ll = 5)
 
@@ -27,20 +28,37 @@ function getQBCA(fnum, D_ul, D_ll)
     optimize(F, f, bounds_ul, bounds_ll, method, Bilevel.Information(F_optimum=0.0, f_optimum=0.0))
 end
 
-function test(D_ul, D_ll)
-    for fnum = 1:8
-        result = getQBCA(fnum, D_ul, D_ll)
-        b      = result.best_sol
-        iters  = result.iteration
-        nevals_ul = result.F_calls
-        nevals_ll = result.f_calls
+function main(D_ul, D_ll)
+    configure()
 
-        @printf("SMD%d \t F = %e \t f = %e \t ev_ul = %d \t ev_ll = %d\n", fnum, b.F, b.f, nevals_ul, nevals_ll)
+    NRUNS = 31
+
+    for fnum = 1:8
+        result_list = []
+        for r = 1:NRUNS
+
+            result = getQBCA(fnum, D_ul, D_ll)
+
+            # store data
+            save("output/SMD_$(D_ul)_$(D_ll)/SMD$(fnum)_r$(r).jld", "result", result)
+            push!(result_list, result)
+
+            # show log
+            b      = result.best_sol
+            iters  = result.iteration
+            nevals_ul = result.F_calls
+            nevals_ll = result.f_calls
+
+            @printf("SMD%d \t run = %d \t F = %e \t f = %e \t ev_ul = %d \t ev_ll = %d\n", fnum, r, b.F, b.f, nevals_ul, nevals_ll)
+        end
+        
+        save("output/SMD_$(D_ul)_$(D_ll)/SMD$(fnum).jld", "result_list", result_list)
     end
 
 end
 
-# test(2, 3)
+# main(2, 3)
+main(5, 5)
 # test(5, 5)
 
-plotConvergence(getQBCA(1, 2, 3))
+# plotConvergence(getQBCA(5, 2, 3))
