@@ -6,7 +6,6 @@ import Printf.@printf
 using JLD
 
 include("tools.jl")
-# include("plots.jl")
 
 function getBilevel(fnum; D_ul = 5, D_ll = 5)
 
@@ -58,7 +57,7 @@ function main(D_ul, D_ll)
 end
 
 # main(2, 3)
-main(5, 5)
+# main(5, 5)
 # test(5, 5)
 
 # plotConvergence(getQBCA(5, 2, 3))
